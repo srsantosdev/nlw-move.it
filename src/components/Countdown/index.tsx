@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useChallenges } from '../../hooks';
 
 import styles from '../../styles/components/Countdown.module.css';
 
@@ -6,6 +7,8 @@ let countdownTimeout: NodeJS.Timeout
 const DEFAULT_TIME = 25 * 60
 
 const Countdown: React.FC = () => {
+  const { startNewChallenge } = useChallenges()
+
   const [time, setTime] = useState(DEFAULT_TIME)
   const [isActive, setIsActive] = useState(false)
   const [hasFinish, setHasFinish] = useState(false)
@@ -40,6 +43,7 @@ const Countdown: React.FC = () => {
     } else if (isActive && time === 0) {
       setHasFinish(true)
       setIsActive(false)
+      startNewChallenge()
     }
   }, [isActive, time])
 
