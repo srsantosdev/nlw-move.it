@@ -1,4 +1,6 @@
 import { createContext, ReactNode, useCallback, useEffect, useState } from "react";
+import Cookies from 'js-cookie'
+
 import challenges from '../../challenges.json'
 
 interface Challenge {
@@ -21,17 +23,21 @@ export interface ChallengesProviderData {
 
 interface ChallengeProviderProps {
   children: ReactNode;
+  level: number;
+  currentExperience: number;
+  challengesCompleted: number;
 }
 
 export const ChallengesContext = createContext({} as ChallengesProviderData)
 
 
 export const ChallengesProvider: React.FC<ChallengeProviderProps> = ({
-  children
+  children,
+  ...rest
 }) => {
-  const [level, setLevel] = useState(1)
-  const [currentExperience, setCurrentExperience] = useState(0)
-  const [challengesCompleted, setChallengesCompleted] = useState(0)
+  const [level, setLevel] = useState(rest.level ?? 1)
+  const [currentExperience, setCurrentExperience] = useState(rest.currentExperience ?? 0)
+  const [challengesCompleted, setChallengesCompleted] = useState(rest.challengesCompleted ?? 0)
 
   const [activeChallenge, setActiveChallenge] = useState(null)
 
@@ -50,7 +56,7 @@ export const ChallengesProvider: React.FC<ChallengeProviderProps> = ({
 
     new Audio('/notification.mp3').play()
 
-    if(Notification.permission === 'granted') {
+    if (Notification.permission === 'granted') {
       new Notification('Novo desafio 🎉', {
         body: `Valendo ${challenge.amount}xp!`
       })
@@ -60,7 +66,7 @@ export const ChallengesProvider: React.FC<ChallengeProviderProps> = ({
   const resetChallenge = useCallback(() => setActiveChallenge(null), [])
 
   const completeChallenge = useCallback(() => {
-    if(!activeChallenge){
+    if (!activeChallenge) {
       return;
     }
 
@@ -68,7 +74,7 @@ export const ChallengesProvider: React.FC<ChallengeProviderProps> = ({
 
     let finalExperience = currentExperience + amount
 
-    if(finalExperience >= experienceToNextLevel) {
+    if (finalExperience >= experienceToNextLevel) {
       finalExperience = finalExperience - experienceToNextLevel
       levelUp()
     }
@@ -81,6 +87,12 @@ export const ChallengesProvider: React.FC<ChallengeProviderProps> = ({
   useEffect(() => {
     Notification.requestPermission();
   }, [])
+
+  useEffect(() => {
+    Cookies.set('level', String(level))
+    Cookies.set('currentExperience', String(currentExperience))
+    Cookies.set('challengesCompleted', String(challengesCompleted))
+  }, [level, currentExperience, challengesCompleted])
 
   return (
     <ChallengesContext.Provider value={{

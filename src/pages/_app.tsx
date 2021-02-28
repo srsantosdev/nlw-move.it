@@ -1,11 +1,8 @@
-import AppProvider from '../providers'
 import '../styles/global.css'
 
 function MyApp({ Component, pageProps }) {
   return (
-    <AppProvider>
-      <Component {...pageProps} />
-    </AppProvider>
+    <Component {...pageProps} />
   )
 }
 
